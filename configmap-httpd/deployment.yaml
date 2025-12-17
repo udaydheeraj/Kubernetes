@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: httpd
+        image: httpd:2.4
+        envFrom:
+        - configMapRef:
+            name: web-config
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            echo "<html><body>
+            <h1>$APP_NAME</h1>
+            <p>Environment: $ENVIRONMENT</p>
+            <p>Owner: $OWNER</p>
+            </body></html>" > /usr/local/apache2/htdocs/index.html &&
+            httpd-foreground
+        ports:
+        - containerPort: 80
